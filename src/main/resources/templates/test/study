@@ -1,0 +1,70 @@
+*서버 포트 설정
+1.application.properties 에 등록
+server.port=9696
+
+-----------------------------------------------------------
+
+*Dev Tools 활성화 : 서버를 재시작하지 않고 바로 클라이언트에게 적용
+1.application.properties 에 등록
+spring.devtools.livereload.enabled=true
+
+
+----------------------------------------------------------
+
+*DB연결
+1. H2 DB connection
+-H2 DB접속 : 개발시에만 사용 -> 개발완료시 오라클이나 MySQL...변경해준다
+runtimeOnly 'com.h2database:h2'
+->저장후 gradle 리프레쉬
+
+2.application.properties에 등록
+-DB연결 설정 (H2 , Oracle , MySQL , MSSQL)
+-H2 DB연결 -> build gradle에서 라이브러리 먼저 연결
+	# DB명 : local -> 사용자\hi\local.mv.db
+	# 계정명 : sa
+	# 암호 : x
+http://localhost:9696/h2-console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.datasource.url=jdbc:h2:~/local
+spring.datasource.dbcp2.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+주의)공백들어가지 않게 조심
+
+----------------------------------------------------------------------
+
+*JPA (Java Persistent API ) 
+:SQL 코드를 사용하지 않고 메소드(자바)를 이용해 DB를 사용
+1.help -> Eclipse marketplace에서 jsp 다운 -> project and external dependencies
+에 jpa 등록됬는지 확인
+
+2.build에 JPA 라이브러리 등록
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'	
+-> 저장후 gradle 리프레쉬
+
+3.application.properties에 등록
+JPA setting
+-jpa가 접근할 DB
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+-수정된 내용만 업데이트 
+spring.jpa.hibernate.ddl-auto=update
+
+4.테이블 생성
+@Entity : 클래스 위에 부여 ,DB의 테이블과 매핑하는 어노테이션 
+
+@Entity -> Question : 테이블명 / 변수 : 컬럼명
+public class Question {
+	//JPA를 사용해서 테이블의 컬럼을 정의할시 반드시 primary key컬럼 정의해야함.
+	@Id		//primary key컬럼 부여 ( 중복된 데이터를 넣을수 없다)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)	//자동으로 값을 증가(시퀀스)
+	private Integer id;
+	
+	@Column(length = 200)
+	private String subject;
+	
+	@Column(columnDefinition = "Text")
+	private String content;
+	
+	private LocalDateTime createDate;

@@ -1,0 +1,44 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.mysite'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	// developmentOnly : 개발시에만 적용 , 배포시 삭제 
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	//H2 DB connection
+	//H2 DB접속 : 개발시에만 사용 -> 개발완료시 오라클이나 MySQL...변경해준다
+	runtimeOnly 'com.h2database:h2'
+	
+	//JPA 라이브러리 등록
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

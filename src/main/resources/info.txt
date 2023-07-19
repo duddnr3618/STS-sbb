@@ -1,0 +1,105 @@
+-Spring Boot 로직
+Client -> dto/vo -> controller -> dto ->service -> dto -> repository
+-> Entity -> DB
+
+@Autowired : 객체를 spring Container에서 생성해서 주입 (DI : 의존성주입)
+->Test코드에서 사용 , 동일한 타입을 찾아서 객체로 만들어준다.(객체 생성)
+
+주의: DB의 서버를 중지후 DB에 저장 후 다시 서버 시작
+
+*서버 포트 설정
+1.application.properties 에 등록
+server.port=9696
+
+-----------------------------------------------------------
+
+*Dev Tools 활성화 : 서버를 재시작하지 않고 바로 클라이언트에게 적용
+1.application.properties 에 등록
+spring.devtools.livereload.enabled=true
+
+
+----------------------------------------------------------
+
+	*DB연결
+
+1. H2 DB connection
+-H2 DB접속 : 개발시에만 사용 -> 개발완료시 오라클이나 MySQL...변경해준다
+runtimeOnly 'com.h2database:h2'
+->저장후 gradle 리프레쉬
+
+2.application.properties에 등록
+-DB연결 설정 (H2 , Oracle , MySQL , MSSQL)
+-H2 DB연결 -> build gradle에서 라이브러리 먼저 연결
+	# DB명 : local -> 사용자\hi\local.mv.db
+	# 계정명 : sa
+	# 암호 : x
+http://localhost:9696/h2-console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.datasource.url=jdbc:h2:~/local
+spring.datasource.dbcp2.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+주의)공백들어가지 않게 조심
+
+----------------------------------------------------------------------
+
+ * JPA (Java Persistent API ) : SQL 코드를 사용하지 않고 메소드(자바)를 이용해 DB를 사용
+
+	1.help -> Eclipse marketplace에서 jsp 다운 ->
+	project and external dependencies에 jpa 등록됬는지 확인
+
+	2.build에 JPA 라이브러리 등록
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'	
+	-> 저장후 gradle 리프레쉬
+
+	3.application.properties에 등록 (JPA설정)- JPA setting
+	jpa가 접근할 DB
+	spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+	-수정된 내용만 업데이트 
+	spring.jpa.hibernate.ddl-auto=update
+	
+	4.테이블 생성
+	@Entity : 클래스 위에 부여 ,DB의 테이블과 매핑하는 어노테이션 
+	
+	@Entity -> Question : 테이블명 / 변수 : 컬럼명
+	public class Question {
+	//JPA를 사용해서 테이블의 컬럼을 정의할시 반드시 primary key컬럼 정의해야함.
+	@Id		//primary key컬럼 부여 ( 중복된 데이터를 넣을수 없다)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)	//자동으로 값을 증가(시퀀스)
+	private Integer id;
+	
+	@Column(length = 200)
+	private String subject;
+	
+	@Column(columnDefinition = "Text")
+	private String content;
+	
+	private LocalDateTime createDate;
+
+	5.Repository 생성 <인터페이스> : JpaRepository< 테이블 , PK의자료형 > 를 상속해서 생성	
+	findAll() : 테이블의 전체 레코드를 검색
+	findId(1) : 레코드 하나	-> select * from question where id = 1
+	save() : insert , update
+	delete() : delete
+	count() : 테이블의 레코드의 총 갯수
+	
+	----------------------------------------------
+	
+	1.QuestionRepository
+		-subject 컬럼을 기준으로 검색 "%날씨%"
+		select * from question where subject like '%?%' -> 메소드 생성
+		
+		-content 컬럼을 기준으로 검색 "%내용%"
+		select * from question where content like '%?%' -> 메소드 생성
+
+		-subject or content 동시에 검색 -> 메소드 생성
+		
+	2.Answer 테이블 값을 insert -> Question_id컬럼을 참조해서 insert
+		AnswerRepository.save()
+			
+	
+	
+	
+	
